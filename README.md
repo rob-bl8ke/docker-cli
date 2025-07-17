@@ -85,13 +85,23 @@ docker run -p 3000:3000 <image id>
 
 # Supporting changes through volumes
 
+#### Windows issues
+💥 Important: If you're on Windows you'll have to use WSL 2 to get this running. Windows doesn't play nice with volumes because of the change in the file system. Here are some important links to help you out if you don't have WSL 2 installed:
+- [Notion Notes on setting up and using WSL 2](https://www.notion.so/Using-Windows-Subsystem-for-Linux-v2-WSL-2-f28951d3411d448dbc5fb1c919c199d3) is based on the following Udemy courses:
+- [The Complete WSL 2 Course for Web Development & Hacking](https://www.udemy.com/course/the-complete-wsl2-course/?couponCode=MT150725G1)
+- [WSL 2, Docker, Kali Linux and Windows Terminal - get started](https://www.udemy.com/course/wsl-2-docker-and-windows-terminal/)
+
+The course [explains a few options for Windows users](https://www.udemy.com/course/docker-and-kubernetes-the-complete-guide/learn/lecture/18799500#overview), but, to get this to use volumes effectively one must move your code to WSL2.
+
+> [Click here](./docs/multiple-github-accounts-wsl.md) for information as to how to handle multiple GitHub accounts in WSL 2. Worthwhile to take a look at [how line-endings are treated and the correct settings to apply for Git](./docs/git-concerns.md).
+
+### Beginning with Volumes
 Making changes to the project source code at this point will not show up in the running container. In order to get these changes to reflect, a different approach is required.
 
 Currently we copy all our source code into the Docker image. A snapshot is created and when a container is spun up, the snapshot is used.
 
 To avoid copying over the public and src directory, we need to make use of a feature in Docker... volumes. A volume will map a folder outside to a folder inside the container.
 
-💥 Important: Switch to a batch terminal before doing the following if you're on Windows.
 
 Effectively this command will attempt to mount the present working directory to the /app directory in the container.
 
@@ -103,8 +113,7 @@ pwd
 docker run -p 3000:3000 -v $(pwd):/app "image-d"
 ```
 
+---
+
 - [You are currently here](https://www.udemy.com/course/docker-and-kubernetes-the-complete-guide/learn/lecture/11437066#overview) - Work from this video on Linux or a MacBook to exercise this...
-- [If you're on Windows - read this!](https://www.udemy.com/course/docker-and-kubernetes-the-complete-guide/learn/lecture/18799500#overview) Unfortunately, there's no way around it. In order to use volumes effectively one must move your code to WSL2.
-- [Notion Notes on setting up and using WSL 2](https://www.notion.so/Using-Windows-Subsystem-for-Linux-v2-WSL-2-f28951d3411d448dbc5fb1c919c199d3) is based on the following Udemy courses:
-    - [The Complete WSL 2 Course for Web Development & Hacking](https://www.udemy.com/course/the-complete-wsl2-course/?couponCode=MT150725G1)
-    - [WSL 2, Docker, Kali Linux and Windows Terminal - get started](https://www.udemy.com/course/wsl-2-docker-and-windows-terminal/)
+---
