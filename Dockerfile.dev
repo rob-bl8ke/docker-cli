@@ -1,0 +1,12 @@
+# Specify a specific version to avoid bugs
+# FROM node:lts-alpine
+FROM node:22-alpine
+
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm install
+
+COPY . .
+
+CMD ["npm", "run", "start"]
