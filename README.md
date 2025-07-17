@@ -1,5 +1,7 @@
 # Docker CLI
 
+[Follow the Udemy course on which this example is based on](https://www.udemy.com/course/docker-and-kubernetes-the-complete-guide/learn/lecture/11437040#overview)
+
 ## Running locally
 
 In order to exercise the following you'll need to have node.js installed. Particularly, the [Udemy course walk-through](https://www.udemy.com/course/docker-and-kubernetes-the-complete-guide/learn/lecture/11437046#overview) uses version 8.11.3.
@@ -80,3 +82,26 @@ The container runs successfully, but the site cannot be reached using `http://lo
 ```
 docker run -p 3000:3000 <image id>
 ```
+
+# Supporting changes through volumes
+
+Making changes to the project source code at this point will not show up in the running container. In order to get these changes to reflect, a different approach is required.
+
+Currently we copy all our source code into the Docker image. A snapshot is created and when a container is spun up, the snapshot is used.
+
+To avoid copying over the public and src directory, we need to make use of a feature in Docker... volumes. A volume will map a folder outside to a folder inside the container.
+
+💥 Important: Switch to a batch terminal before doing the following if you're on Windows.
+
+Effectively this command will attempt to mount the present working directory to the /app directory in the container.
+
+```bash
+# Ensure this works... (get the present working directory)
+pwd
+
+# Map the pwd into the /app folder in the container...
+docker run -p 3000:3000 -v $(pwd):/app "image-d"
+```
+
+- [You are currently here](https://www.udemy.com/course/docker-and-kubernetes-the-complete-guide/learn/lecture/11437066#overview) - Work from this video on Linux or a MacBook to exercise this...
+- [If you're on Windows - read this!](https://www.udemy.com/course/docker-and-kubernetes-the-complete-guide/learn/lecture/18799500#overview) Unfortunately, there's no way around it. In order to use volumes effectively one must move your code to WSL2.
