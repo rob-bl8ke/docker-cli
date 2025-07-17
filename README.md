@@ -105,3 +105,6 @@ docker run -p 3000:3000 -v $(pwd):/app "image-d"
 
 - [You are currently here](https://www.udemy.com/course/docker-and-kubernetes-the-complete-guide/learn/lecture/11437066#overview) - Work from this video on Linux or a MacBook to exercise this...
 - [If you're on Windows - read this!](https://www.udemy.com/course/docker-and-kubernetes-the-complete-guide/learn/lecture/18799500#overview) Unfortunately, there's no way around it. In order to use volumes effectively one must move your code to WSL2.
+- [Notion Notes on setting up and using WSL 2](https://www.notion.so/Using-Windows-Subsystem-for-Linux-v2-WSL-2-f28951d3411d448dbc5fb1c919c199d3) is based on the following Udemy courses:
+    - [The Complete WSL 2 Course for Web Development & Hacking](https://www.udemy.com/course/the-complete-wsl2-course/?couponCode=MT150725G1)
+    - [WSL 2, Docker, Kali Linux and Windows Terminal - get started](https://www.udemy.com/course/wsl-2-docker-and-windows-terminal/)
