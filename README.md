@@ -103,7 +103,7 @@ Currently we copy all our source code into the Docker image. A snapshot is creat
 To avoid copying over the public and src directory, we need to make use of a feature in Docker... volumes. A volume will map a folder outside to a folder inside the container.
 
 
-Effectively this command will attempt to mount the present working directory to the /app directory in the container.
+Effectively this command will attempt to map the present working directory to the app/ directory in the container.
 
 ```bash
 # Ensure this works... (get the present working directory)
@@ -113,7 +113,19 @@ pwd
 docker run -p 3000:3000 -v $(pwd):/app "image-d"
 ```
 
----
+When you run this command you'll get a `sh: react-scripts: not found` or something similar. This is happening because we're missing an argument.
 
-- [You are currently here](https://www.udemy.com/course/docker-and-kubernetes-the-complete-guide/learn/lecture/11437066#overview) - Work from this video on Linux or a MacBook to exercise this...
----
+Let's understand what's going on. [This video explains](https://www.udemy.com/course/docker-and-kubernetes-the-complete-guide/learn/lecture/11437068#overview) that when we map the present working directory to app/ we are missing the node_modules folder. The mapped folder (on this computer) does not contain a node_modules folder because the `npm install` happened within the container and not on this computer. This is why we get this error message.
+
+Fix this by modifying the terminal command as such...
+
+```bash
+# Map the pwd into the /app folder in the container...
+# Put a bookmark on the node_modules folder
+docker run -p 3000:3000 -v /app/node_modules -v $(pwd):/app "image-d"
+```
+
+Note that this flag does not have a colon because there is no mapping. With this terminal command we will successfully start the react app and can navigate to it in the browser (this includes WSL 2).
+
+🙂 Also note that if we make a change to `App.js` and save the file it immediately shows up in the brower window. This is a function of the react engine but in order to get this to work correctly, react needs to see the changes in the folder.
+
