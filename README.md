@@ -168,3 +168,13 @@ services:
 Now it should work as expected.
 
 💥 A question you might be asking yourself is: "Do we still need the `COPY . .` step in the `Dockerfile.dev`? Stricktly no, because we're now looking at files on your local file system. The instructor prefers to leave the instruction in because at some point in time in the future he might use the current file as a blueprint for setting up something in production, or decide to do away with docker-compose completely. Without `docker-compose.yml` it would not work on its own. You decide. 🙂
+
+# Executing the tests
+
+This should be straight forward now.
+
+To run a specific command on the container, one appends the command at the end of the `docker run` command like so...
+```
+run -it f1dc56fadb3d18 npm run test
+```
+💥 Make sure you use the `-it` flag or you'll likely get some unexpected terminal input behavior.
