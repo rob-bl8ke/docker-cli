@@ -212,5 +212,33 @@ Be sure to do a `docker compose up --build` (don't forget the build flag just in
 
 The downside is that we get all the output from the test suite from all the logging to docker compose. We don't have the ability to add any standard input/output to that container. Can't hit ENTER to get the tests to rerun etc.
 
-But can we attach to the container?
+[Why is this happening](https://www.udemy.com/course/docker-and-kubernetes-the-complete-guide/learn/lecture/29412500#overview)? The web container and the test container start up with a primary command. Every time a container starts up it gets its own copy of stdin, stdout, and stderr. If one attempts to type on the keyboard the text appears but there is nothing forwarding it into stdin on either one of the containers. With docker compose this is not easy to set up.
+
+But can we attach to the container? `docker attach` attaches to the stdin, stdout, and stderr of the primary process inside the container. Let's try it. Open up a new terminal and do the following...
+
+```bash
+# Get the id of the running container
+docker ps
+
+# Use that id to attach to the tests container
+docker attach <id>
+```
+
+Doesn't work too well does it? Unfortunately, `docker compose` has a shortcoming here, and this is as good as it gets.
+
+Why? Let's open up another terminal and run this command. This will allow us to open up a terminal into the container.
+
+```bash
+# Get the id of the running container
+docker ps
+
+# Use that id to attach to the tests container
+docker exec -it id sh
+```
+
+The problem remains. But we can gather some insight when doing the following...
+
+Run `ps` which lists the running processes inside the container.  When we run `npm test` we're actually running npm. npm uses the argument we send it to open up another process that essentially runs the tests (one of the processes in the list). This other process is not the primary process (npm). npm is not responsible for picking up the input to this other process. Ideally, to work with the other process, we would need our terminal to attach to that process' stdin, stdout, stderr. Unfortunately, this is not an option available to us.
+
+So Option 1 is better when one is interacting with the tests in a development environment. This is a problem for `jest` but there are other test frameworks out there that do not expose this sort of command line interaction. So its not a show stopper.
 
