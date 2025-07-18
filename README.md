@@ -167,7 +167,7 @@ services:
 
 Now it should work as expected.
 
-💥 A question you might be asking yourself is: "Do we still need the `COPY . .` step in the `Dockerfile.dev`? Stricktly no, because we're now looking at files on your local file system. The instructor prefers to leave the instruction in because at some point in time in the future he might use the current file as a blueprint for setting up something in production, or decide to do away with docker-compose completely. Without `docker-compose.yml` it would not work on its own. You decide. 🙂
+💥 A question you might be asking yourself is: "Do we still need the `COPY . .` step in the `Dockerfile.dev`? Strictly no, because we're now looking at files on your local file system. The instructor prefers to leave the instruction in because at some point in time in the future he might use the current file as a blueprint for setting up something in production, or decide to do away with docker-compose completely. Without `docker-compose.yml` it would not work on its own. You decide. 🙂
 
 # Executing the tests
 
@@ -178,3 +178,27 @@ To run a specific command on the container, one appends the command at the end o
 run -it f1dc56fadb3d18 npm run test
 ```
 💥 Make sure you use the `-it` flag or you'll likely get some unexpected terminal input behavior.
+
+### What about modifications to the tests?
+
+Let's try and make a modification to the tests. Go and change some code in `App.test.js`. Copy the test and paste it in again (effectively duplicating it).
+
+Hmmm.... why does this change not get picked up and trigger the tests to run again? This could be solved by:
+- Attach to the existing container that is created and execute a command to start up the test suite inside a container that already has all the volume mapping set up.
+- Adding another service and setting up volumes solely to run the test suite.
+
+#### Option 1: Attaching to the existing container
+
+Run `docker compose up` again and open up another terminal. In this other terminal run the following command...
+```
+exec -it 28efa7f7d1fa npm run test
+```
+
+The tests will run. If we duplicate the test and save the file the change will be picked up and the tests will run again (with both tests). Delete the duplicated test and save and the tests will be triggered and only a single tests will run.
+
+❓Why does this happen?
+
+But this is not the best solution because it has to be done manually and requires multiple steps.
+
+#### Option 2: Adding another service
+
