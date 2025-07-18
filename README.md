@@ -129,3 +129,42 @@ Note that this flag does not have a colon because there is no mapping. With this
 
 🙂 Also note that if we make a change to `App.js` and save the file it immediately shows up in the brower window. This is a function of the react engine but in order to get this to work correctly, react needs to see the changes in the folder.
 
+# Building with Docker Compose
+
+This is still a ridiculously long line to run to achieve this functionality. Docker Compose can greatly simplify things. Now this first attempt will fail because it looks for `Dockerfile`. We have `Docker.dev` and in any event, we will want to specifically target this file.
+
+```docker
+version: '3'
+services:
+  web:
+    build: .
+    ports:
+      - "3000:3000"
+    volumes:
+      - /app/node_modules
+      - .:/app
+```
+We get an error like this:
+``
+failed to solve: failed to read dockerfile: open Dockerfile: no such file or directory
+```
+
+Let's fix it to target the file specifically.
+
+```docker
+version: '3'
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - /app/node_modules
+      - .:/app
+```
+
+Now it should work as expected.
+
+💥 A question you might be asking yourself is: "Do we still need the `COPY . .` step in the `Dockerfile.dev`? Stricktly no, because we're now looking at files on your local file system. The instructor prefers to leave the instruction in because at some point in time in the future he might use the current file as a blueprint for setting up something in production, or decide to do away with docker-compose completely. Without `docker-compose.yml` it would not work on its own. You decide. 🙂
