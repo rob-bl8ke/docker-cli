@@ -202,3 +202,15 @@ But this is not the best solution because it has to be done manually and require
 
 #### Option 2: Adding another service
 
+Let's create a second service to the `docker-compose.yml` file. Call it tests. It'll look almost the same as the first service but it won't contain the ports. It'll also override the default startup command.
+
+```
+
+```
+
+Be sure to do a `docker compose up --build` (don't forget the build flag just in case). Notice now that if you make a change to your `App.test.js` it will trigger the tests to run again with the changes.
+
+The downside is that we get all the output from the test suite from all the logging to docker compose. We don't have the ability to add any standard input/output to that container. Can't hit ENTER to get the tests to rerun etc.
+
+But can we attach to the container?
+
