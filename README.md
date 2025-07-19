@@ -327,3 +327,67 @@ docker run -p 8080:80 8a07e624
 
 Once up and running, you'll be able to browse to the site on http://localhost:8080/. For an example to achieve these steps with Vite instead of Create React App, navigate to this [Udemy resource](https://www.udemy.com/course/docker-and-kubernetes-the-complete-guide/learn/lecture/50824641#overview).
 
+
+## CI Workflow with GitHub
+
+### Initial script
+[Here is a sample GitHub workflows YAML file template to build a Docker image](https://github.com/rob-bl8ke/docker-cli/new/main?filename=.github%2Fworkflows%2Fdocker-image.yml&workflow_template=ci%2Fdocker-image)
+
+```yaml
+name: Deploy Frontend
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t youruser/react-poc -f Dockerfile.dev .
+      - run: docker run -e CI=true youruser/react-poc npm test
+
+```
+### Break down of each section
+
+This is a GitHub Actions CI workflow that runs automated builds and tests for your React application whenever code is pushed to the main branch.
+
+#### Trigger
+
+```
+on:
+  push:
+    branches:
+      - main
+```
+- Automatically runs whenever you push commits to the main branch
+- Only triggers on the main branch, not on feature branches or pull requests
+
+#### Job Configuration
+
+```
+jobs:
+  build:
+    runs-on: ubuntu-latest
+```
+- Creates a job named "build" that runs on the latest Ubuntu virtual machine provided by GitHub
+
+#### Steps Executed
+
+```
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t youruser/react-poc -f Dockerfile.dev .
+      - run: docker run -e CI=true youruser/react-poc npm test
+```
+
+- Checkout Code - Downloads your repository code to the GitHub Actions runner
+- Builds a Docker image using your Dockerfile.dev
+- Tags the image as youruser/react-poc
+- Uses the development Dockerfile (not the production one)
+- Runs the test suite inside the Docker container
+- The CI=true environment variable ensures Jest runs in non-interactive mode
+- If any tests fail, the workflow will fail
+
+This workflow is more of a CI (Continuous Integration) pipeline rather than a true deployment pipeline since it only builds and tests but doesn't actually deploy anywhere. To make it a proper deployment workflow, you'd typically add steps to push the built image to a registry or deploy to a hosting platform.
