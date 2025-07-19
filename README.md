@@ -46,7 +46,7 @@ To target the `Dockerfile.dev` build, add an `-f` flag (for file) and run as bel
 docker build -f Dockerfile.dev .
 ```
 
-Here's the initial file, let's examine it:
+Here's the initial file, let's examine it. Its important to target a specific node version to avoid bugs popping up as time progresses.
 
 ```docker
 FROM node:22-alpine
@@ -241,4 +241,67 @@ The problem remains. But we can gather some insight when doing the following...
 Run `ps` which lists the running processes inside the container.  When we run `npm test` we're actually running npm. npm uses the argument we send it to open up another process that essentially runs the tests (one of the processes in the list). This other process is not the primary process (npm). npm is not responsible for picking up the input to this other process. Ideally, to work with the other process, we would need our terminal to attach to that process' stdin, stdout, stderr. Unfortunately, this is not an option available to us.
 
 So Option 1 is better when one is interacting with the tests in a development environment. This is a problem for `jest` but there are other test frameworks out there that do not expose this sort of command line interaction. So its not a show stopper.
+
+## Build the Production Container (with Nginx)
+
+[Udemy Course Bookmark](https://www.udemy.com/course/docker-and-kubernetes-the-complete-guide/learn/lecture/11437092#overview)
+
+We want to use `npm run build` to run our application in a production environment. The dev environment differs from the prod environment because it contains a development server. In production this server does not exist.
+
+We need a server for the production environment. We'll use Nginx. Let's create a seperate Docker file to create a production version of our web container.
+
+The `Dockerfile` will need the following steps:
+
+- User `node:alpine`
+- Copy the `package.json` file
+- Install dependencies
+- Run `npm run build`
+- Start nginx and serve
+
+The dependencies are only necessary to build the application (static files). Once the build is complete the dependencies are no longer necessary. The build folder contains all the stuff we need and everything outside of this folder is not necessary to run our application in a production environment.
+
+Got to [Docker Hub](http://hub.docker.com) and search for Nginx or simply [navigate to the page](https://hub.docker.com/_/nginx). Scroll down to [Hosting some simple static content](https://hub.docker.com/_/nginx#hosting-some-simple-static-content).
+
+We need two base images. A multi-step build process.
+- First one (build phase) builds the application and generates the build folder.
+- Second one (run phase) uses nginx together with the output from the build phase to create a second images that accomplishes what we need. All the build dependency stuff that's unnecessary will be discarded.
+
+### A multi-step build process
+
+Let's analyze the first step. Its important to target a specific node version to avoid bugs popping up as time progresses. We do a straight copy because we're not interested in detecting code changes and volumes are not used.
+
+```docker
+FROM node:22-alpine as builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+COPY . .
+
+RUN npm run build
+```
+
+The build folder (that we'll copy over in the run phase) on the final image will be on the path `app/build`. This makes sense because on our local machine, if we had to build the solution, the build folder would be in the root directory of our app.
+
+A glance at [Hosting some simple static content](https://hub.docker.com/_/nginx#hosting-some-simple-static-content) hints at the folder we want to copy the contents of hte build folder to on our the run phase image.
+
+```docker
+FROM nginx
+COPY --from=builder /app/build /usr/share/nginx/html
+```
+
+🙂 In this scenario, it turns out we don't need a CMD because the nginx image default behavior is to start up the server.
+
+🙂 THe final image will be quite small. Almost as small as the nginx base image.
+
+
+Let's test it out. We need this simple build step because the file is named `Dockerfile` and will be picked up automatically.
+
+```bash
+docker build .
+
+# Run the image with the id from the build step
+docker run -p 8080:80 8a07e624
+```
+
+Once up and running, you'll be able to browse to the site on http://localhost:8080/. For an example to achieve these steps with Vite instead of Create React App, navigate to this [Udemy resource](https://www.udemy.com/course/docker-and-kubernetes-the-complete-guide/learn/lecture/50824641#overview)
 
