@@ -438,3 +438,47 @@ git push origin master
 ```
 
 Elastic Beanstalk will then redeploy the application and correctly map traffic to port 80 inside the container.
+
+---
+
+## Change GitHub Workflow Behavior to run on closed PRs
+
+
+```yaml
+on:
+  push:
+    branches:
+      - main
+```
+Currently, the workflow runs every time **someone pushes directly to `main`** (e.g., `git push origin main`), including merges or commits.
+
+Simply change to this...
+
+```yaml
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - closed
+```
+
+Now the workflow only runs when a **pull request targeting `main` is closed**, **and only if it was merged** (GitHub filters out PRs that were simply closed without merging).
+
+* Promotes cleaner CI/CD practices by **requiring PR merges** instead of allowing direct pushes.
+* You can now enforce code review, automated tests, and approvals before any changes are deployed to `main`.
+
+## How to Protect the `main` Branch in GitHub
+
+To **prevent direct pushes** and enforce pull request-based workflow:
+
+1. Go to your **GitHub repository**.
+2. Click **Settings** → **Branches**.
+3. Under "Branch protection rules," click **Add rule**.
+4. Set **Branch name pattern** to `main`.
+5. Enable these options:
+   * ✅ **Require a pull request before merging**
+
+6. Click **Create** or **Save changes**.
+
+This ensures all changes to `main` go through pull requests, enforcing your new workflow.
