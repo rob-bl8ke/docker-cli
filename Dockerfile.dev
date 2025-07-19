@@ -9,4 +9,11 @@ RUN npm install
 
 COPY . .
 
+# # Enable polling for file watching on Windows
+# ENV CHOKIDAR_USEPOLLING=true
+# # Set polling interval (in milliseconds) - default is 100ms
+# ENV CHOKIDAR_INTERVAL=1000
+# # Reduce CPU usage
+# ENV WATCHPACK_POLLING=true
+
 CMD ["npm", "run", "start"]

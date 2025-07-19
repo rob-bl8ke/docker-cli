@@ -169,6 +169,21 @@ Now it should work as expected.
 
 💥 A question you might be asking yourself is: "Do we still need the `COPY . .` step in the `Dockerfile.dev`? Strictly no, because we're now looking at files on your local file system. The instructor prefers to leave the instruction in because at some point in time in the future he might use the current file as a blueprint for setting up something in production, or decide to do away with docker-compose completely. Without `docker-compose.yml` it would not work on its own. You decide. 🙂
 
+### Windows Support
+
+Note the inclusion of the environment sections in the Docker Compose file. This is necessary to be able to detect the changes in the browser during development on Windows.
+
+```yaml
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      - CHOKIDAR_INTERVAL=1000
+      - WATCHPACK_POLLING=true
+```
+
+This has also been added to the `Dockerfile.dev` although, in reality it's probably not needed because one would always want to mount the volumes and the `Dockerfile.dev` edits will not work with the tests. The commented code is there to show how it would look (using environment variables).
+
+See more details see [Windows change detection and file watching](./docs/windows-change-detection.md).
+
 # Executing the tests
 
 This should be straight forward now.
@@ -190,8 +205,8 @@ Hmmm.... why does this change not get picked up and trigger the tests to run aga
 #### Option 1: Attaching to the existing container
 
 Run `docker compose up` again and open up another terminal. In this other terminal run the following command...
-```
-exec -it 28efa7f7d1fa npm run test
+```bash
+docker exec -it [id] npm run test
 ```
 
 The tests will run. If we duplicate the test and save the file the change will be picked up and the tests will run again (with both tests). Delete the duplicated test and save and the tests will be triggered and only a single tests will run.
@@ -204,8 +219,15 @@ But this is not the best solution because it has to be done manually and require
 
 Let's create a second service to the `docker-compose.yml` file. Call it tests. It'll look almost the same as the first service but it won't contain the ports. It'll also override the default startup command.
 
-```
-
+```yaml
+  tests:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      - /app/node_modules
+      - .:/app
+    command: ["npm", "run", "test"]
 ```
 
 Be sure to do a `docker compose up --build` (don't forget the build flag just in case). Notice now that if you make a change to your `App.test.js` it will trigger the tests to run again with the changes.
@@ -303,5 +325,5 @@ docker build .
 docker run -p 8080:80 8a07e624
 ```
 
-Once up and running, you'll be able to browse to the site on http://localhost:8080/. For an example to achieve these steps with Vite instead of Create React App, navigate to this [Udemy resource](https://www.udemy.com/course/docker-and-kubernetes-the-complete-guide/learn/lecture/50824641#overview)
+Once up and running, you'll be able to browse to the site on http://localhost:8080/. For an example to achieve these steps with Vite instead of Create React App, navigate to this [Udemy resource](https://www.udemy.com/course/docker-and-kubernetes-the-complete-guide/learn/lecture/50824641#overview).
 
