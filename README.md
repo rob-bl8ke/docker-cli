@@ -328,7 +328,7 @@ docker run -p 8080:80 8a07e624
 Once up and running, you'll be able to browse to the site on http://localhost:8080/. For an example to achieve these steps with Vite instead of Create React App, navigate to this [Udemy resource](https://www.udemy.com/course/docker-and-kubernetes-the-complete-guide/learn/lecture/50824641#overview).
 
 
-## CI Workflow with GitHub
+## CI Build workflow with GitHub
 
 ### Initial script
 [Here is a sample GitHub workflows YAML file template to build a Docker image](https://github.com/rob-bl8ke/docker-cli/new/main?filename=.github%2Fworkflows%2Fdocker-image.yml&workflow_template=ci%2Fdocker-image)
@@ -390,4 +390,51 @@ jobs:
 - The CI=true environment variable ensures Jest runs in non-interactive mode
 - If any tests fail, the workflow will fail
 
-This workflow is more of a CI (Continuous Integration) pipeline rather than a true deployment pipeline since it only builds and tests but doesn't actually deploy anywhere. To make it a proper deployment workflow, you'd typically add steps to push the built image to a registry or deploy to a hosting platform.
+In this state, this workflow is more of a CI (Continuous Integration) pipeline rather than a true deployment pipeline since it only builds and tests but doesn't actually deploy anywhere. To make it a proper deployment workflow, you'd typically add steps to push the built image to a registry or deploy to a hosting platform.
+
+## Convert the build workflow to a deployment pipeline
+
+[This resource on Udemy explains briefly what Elastic Beanstalk behaves](https://www.udemy.com/course/docker-and-kubernetes-the-complete-guide/learn/lecture/11437140#questions/17673926)
+
+To deploy our project, we're going to be making use of Elastic Beanstalk, which you can find by searching for Elastic Beanstalk on AWS. Elastic Beanstalk is by far easiest way to get started with production Docker instances.
+
+Elastic Beanstalk is most appropriate when you're running exactly one container at a time. The equivalent of AWS Elastic Beanstalk in Microsoft Azure is Azure App Service.
+
+The following steps are also outlined on [this resource, which shows how to complete the Elastic Beanstalk setup and configuration](https://www.udemy.com/course/docker-and-kubernetes-the-complete-guide/learn/lecture/41614578#questions/17673926) however, [your notes are specific for GitHub Actions and combine the two tasks logically](./docs/github-actions-aws-deployment-guide.md).
+
+### Rename `docker-compose.yml`
+
+Rename `docker-compose.yml` to `docker-compose-dev.yml` to avoid conflicts when running GitHub Actions.
+
+### Setup repository secrets in GitHub
+
+[Setup repository secrets in GitHub](https://github.com/rob-bl8ke/docker-cli/settings/secrets/actions):
+- AWS_ACCESS_KEY
+- AWS_SECRET_KEY
+- DOCKER_PASSWORD
+- DOCKER_USERNAME
+
+
+### Exposing a Port in Docker for Elastic Beanstalk
+
+When running a Docker container locally, it is typically necessary to manually map ports using the `-p` flag (e.g., `docker run -p 80:80`) to expose internal container ports to the host system. By default, Docker does not expose any ports to the outside world unless explicitly configured.
+
+However, when deploying containers to **AWS Elastic Beanstalk**, port exposure is handled differently. Elastic Beanstalk inspects the `Dockerfile` for the `EXPOSE` instruction and uses it to automatically configure incoming traffic routing to the container.
+
+To expose a port for use by Elastic Beanstalk, include the following instruction in your production `Dockerfile`:
+
+```dockerfile
+EXPOSE 80
+```
+
+Although the `EXPOSE` instruction has no direct effect when running containers locally (it acts as metadata for developers), Elastic Beanstalk relies on it to determine which port to forward traffic to.
+
+After modifying the `Dockerfile`, commit and push your changes:
+
+```bash
+git add Dockerfile
+git commit -m "Expose port 80 for Elastic Beanstalk"
+git push origin master
+```
+
+Elastic Beanstalk will then redeploy the application and correctly map traffic to port 80 inside the container.
